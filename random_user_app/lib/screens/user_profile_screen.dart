@@ -58,6 +58,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               : Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     CircleAvatar(
                       radius: 60,
