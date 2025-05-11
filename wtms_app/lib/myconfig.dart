@@ -1,3 +1,3 @@
 class MyConfig {
-  static const String server = "http://192.168.100.59/wtms/";
+  static const String server = "http://10.0.2.2/wtms/";
 }
