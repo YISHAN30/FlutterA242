@@ -85,7 +85,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             const SizedBox(height: 5),
             SizedBox(height: 20),
             Text(
-              result.toStringAsFixed(2) + "cm3",
+              "${result.toStringAsFixed(2)}cm3",
               style: TextStyle(fontSize: 32),
             ),
             Text("Centimeters Cubed"),
