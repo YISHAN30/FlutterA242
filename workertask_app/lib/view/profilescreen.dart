@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workertask_app/model/worker.dart';
 import 'loginscreen.dart';
-import 'tasklistscreen.dart'; // <-- import task list screen
+import 'tasklistscreen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final Worker worker;
@@ -39,32 +39,57 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("ID: ${worker.workerId}"),
-            const SizedBox(height: 5),
-            Text("Name: ${worker.workerName}"),
-            const SizedBox(height: 5),
-            Text("Email: ${worker.workerEmail}"),
-            const SizedBox(height: 5),
-            Text("Phone: ${worker.workerPhone}"),
-            const SizedBox(height: 5),
-            Text("Address: ${worker.workerAddress}"),
-            const Spacer(),
-            Center(
-              child: ElevatedButton(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('images/Logo.png', width: 150, height: 150),
+              const SizedBox(height: 10),
+              Text(
+                "Worker ID: ${worker.workerId}",
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Name: ${worker.workerName}",
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Email: ${worker.workerEmail}",
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Phone: ${worker.workerPhone}",
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Address: ${worker.workerAddress}",
+                style: const TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
                 onPressed: () => _viewTasks(context),
-                child: const Text("View Task"),
+                child: const Text(
+                  "View Assigned Task",
+                  style: TextStyle(fontSize: 18),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 12,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

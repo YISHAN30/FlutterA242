@@ -44,46 +44,54 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Task List Screen")),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: workList.length,
-              itemBuilder: (context, index) {
-                Work work = workList[index];
-                bool isComplete = (work.status ?? '').toLowerCase() == 'complete';
-                return Card(
-                  color: isComplete ? Colors.green[100] : Colors.white,
-                  child: ListTile(
-                    title: Text(work.title ?? ''),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Description: ${work.description}"),
-                        Text("Assigned: ${work.dateAssigned}"),
-                        Text("Due: ${work.dueDate}"),
-                        Text("Status: ${work.status}"),
-                      ],
+      appBar: AppBar(
+        title: const Text("Task List Screen"),
+        backgroundColor: const Color.fromARGB(255, 160, 236, 255),
+      ),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                itemCount: workList.length,
+                itemBuilder: (context, index) {
+                  Work work = workList[index];
+                  bool isComplete =
+                      (work.status ?? '').toLowerCase() == 'complete';
+                  return Card(
+                    color: isComplete ? Colors.green[100] : Colors.white,
+                    child: ListTile(
+                      title: Text(work.title ?? ''),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Description: ${work.description}"),
+                          Text("Assigned: ${work.dateAssigned}"),
+                          Text("Due: ${work.dueDate}"),
+                          Text("Status: ${work.status}"),
+                        ],
+                      ),
+                      trailing:
+                          isComplete
+                              ? null
+                              : ElevatedButton(
+                                child: const Text("Submit"),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => SubmitCompletionScreen(
+                                            worker: widget.worker,
+                                            work: work,
+                                          ),
+                                    ),
+                                  ).then((_) => _loadTasks());
+                                },
+                              ),
                     ),
-                    trailing: isComplete
-                        ? null
-                        : ElevatedButton(
-                            child: const Text("Submit"),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      SubmitCompletionScreen(
-                                          worker: widget.worker, work: work),
-                                ),
-                              ).then((_) => _loadTasks());
-                            },
-                          ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
     );
   }
 }

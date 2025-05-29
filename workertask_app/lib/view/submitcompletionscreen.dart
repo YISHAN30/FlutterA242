@@ -60,7 +60,10 @@ class _SubmitCompletionScreenState extends State<SubmitCompletionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Submit Completion")),
+      appBar: AppBar(
+        title: const Text("Submit Completion"),
+        backgroundColor: const Color.fromARGB(255, 160, 236, 255),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

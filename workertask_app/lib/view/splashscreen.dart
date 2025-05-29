@@ -25,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             colors: [
               const Color.fromRGBO(254, 255, 170, 1),
-              const Color.fromARGB(255, 255, 200, 132),
+              const Color.fromARGB(255, 251, 190, 115),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -35,14 +35,14 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset('images/Logo.png', width: 120, height: 120),
+              Image.asset('images/Logo.png', width: 180, height: 180),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: const Text(
-                  "Welcome to Worker Task Management System",
+                  "Welcome to Worker Task Completion System",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 20),
@@ -54,6 +54,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   : ElevatedButton(
                     onPressed: _handleLoginNavigation,
                     child: const Text("Enter"),
+                    style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(fontSize: 18),
+                    ),
                   ),
             ],
           ),

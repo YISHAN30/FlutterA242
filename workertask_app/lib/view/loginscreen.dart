@@ -35,12 +35,9 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.asset(
-              'images/Logo.png',
-              width: 150, // adjust size as needed
-              height: 150,
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
+            Image.asset('images/Logo.png', width: 150, height: 150),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Card(
