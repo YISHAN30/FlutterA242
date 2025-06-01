@@ -30,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.greenAccent,
         elevation: 8,
         centerTitle: true,
       ),
@@ -111,9 +111,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(
                       width: 400,
                       child: ElevatedButton(
-                        onPressed: registerUserDialog,
+                        onPressed: registerWorkerDialog,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.greenAccent,
                           foregroundColor: Colors.white,
                           elevation: 5,
                           shape: RoundedRectangleBorder(
@@ -139,7 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void registerUserDialog() {
+  void registerWorkerDialog() {
     String name = nameController.text.trim();
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
@@ -196,7 +196,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: const Text("Confirm"),
               onPressed: () {
                 Navigator.of(context).pop();
-                registerUser();
+                registerWorker();
               },
             ),
             TextButton(
@@ -211,7 +211,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void registerUser() async {
+  void registerWorker() async {
     String name = nameController.text;
     String email = emailController.text;
     String password = passwordController.text;
@@ -219,12 +219,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse("${MyConfig.server}/os_application/register_user.php"),
+        Uri.parse("${MyConfig.server}/register_worker.php"),
         body: {
-          'user_name': name,
-          'user_email': email,
-          'user_password': password,
-          'user_phone': phone,
+          'worker_name': name,
+          'worker_email': email,
+          'worker_password': password,
+          'worker_phone': phone,
         },
       );
 

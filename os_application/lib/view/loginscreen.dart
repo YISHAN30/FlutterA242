@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:os_application/model/user.dart';
+import 'package:os_application/model/worker.dart';
 import 'package:os_application/myconfig.dart';
 import 'package:os_application/view/registerscreen.dart';
 import 'package:os_application/view/mainscreen.dart';
@@ -37,19 +37,21 @@ class _LoginScreenState extends State<LoginScreen> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.greenAccent,
         elevation: 4,
         centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.asset("image/logo.png", height: 300),
+            const SizedBox(height: 20),
+            Center(child: Image.asset("images/logo.png", height: 280)),
+            const SizedBox(height: 1),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Card(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
                       TextField(
@@ -65,9 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(fontSize: 16),
                       ),
-
                       const SizedBox(height: 10),
-
                       TextField(
                         controller: passwordController,
                         decoration: InputDecoration(
@@ -81,7 +81,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: true,
                         style: const TextStyle(fontSize: 16),
                       ),
-
                       Row(
                         children: [
                           const Text("Remember Me"),
@@ -95,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (isChecked) {
                                 String email = emailController.text.trim();
                                 String password = passwordController.text;
-
                                 if (email.isEmpty || password.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
@@ -126,13 +124,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-
                       ElevatedButton(
-                        onPressed: () {
-                          loginUser();
-                        },
+                        onPressed: loginWorker,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.greenAccent,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -151,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-
+            const SizedBox(height: 8),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -161,7 +156,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
-
               child: const Text(
                 "Register a new account?",
                 style: TextStyle(
@@ -170,25 +164,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-
-            GestureDetector(
-              onTap: () {},
-              child: const Text(
-                "Forgot Password?",
-                style: TextStyle(
-                  color: Colors.blueAccent,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
 
-  void loginUser() {
+  void loginWorker() {
     String email = emailController.text;
     String password = passwordController.text;
 
@@ -212,30 +195,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
     http
         .post(
-          Uri.parse("${MyConfig.server}/os_application/login_user.php"),
-          body: {"user_email": email, "user_password": password},
+          Uri.parse("${MyConfig.server}/login_worker.php"),
+          body: {"worker_email": email, "worker_password": password},
         )
         .then((response) {
           if (response.statusCode == 200) {
             var jsondata = json.decode(response.body);
             if (jsondata['status'] == 'success') {
               var userdata = jsondata['data'];
-              User user = User.fromJson(userdata[0]);
+              Worker worker = Worker.fromJson(userdata[0]);
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    "Welcome ${user.userName}!",
+                    "Welcome ${worker.workerName}!",
                     style: const TextStyle(color: Colors.white),
                   ),
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.blueAccent,
                   behavior: SnackBarBehavior.fixed,
                 ),
               );
 
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => MainScreen(user: user)),
+                MaterialPageRoute(
+                  builder: (context) => MainScreen(worker: worker),
+                ),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -265,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Preferences stored successfully!"),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.blueAccent,
         ),
       );
     } else {

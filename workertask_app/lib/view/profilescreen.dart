@@ -75,10 +75,6 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () => _viewTasks(context),
-                child: const Text(
-                  "View Assigned Task",
-                  style: TextStyle(fontSize: 18),
-                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blueAccent,
                   foregroundColor: Colors.white,
@@ -86,6 +82,10 @@ class ProfileScreen extends StatelessWidget {
                     horizontal: 40,
                     vertical: 12,
                   ),
+                ),
+                child: const Text(
+                  "View Assigned Task",
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
             ],

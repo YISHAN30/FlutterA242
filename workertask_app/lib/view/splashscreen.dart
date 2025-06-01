@@ -53,10 +53,10 @@ class _SplashScreenState extends State<SplashScreen> {
                   )
                   : ElevatedButton(
                     onPressed: _handleLoginNavigation,
-                    child: const Text("Enter"),
                     style: ElevatedButton.styleFrom(
                       textStyle: const TextStyle(fontSize: 18),
                     ),
+                    child: const Text("Enter"),
                   ),
             ],
           ),

@@ -1,122 +1,271 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:os_application/myconfig.dart';
-import 'package:os_application/view/loginscreen.dart';
-import 'package:os_application/model/user.dart';
+import 'package:os_application/model/worker.dart';
+import 'package:os_application/view/mainscreen.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final User user;
+  final Worker worker;
 
-  const CheckoutScreen({super.key, required this.user});
+  const CheckoutScreen({super.key, required this.worker});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  Position? _currentPosition;
-  String _address = '';
+  Position? _position;
   File? _image;
+  final picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _determinePosition();
+    _getLocation();
   }
 
-  void _determinePosition() async {
+  Future<void> _getLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Location services are disabled.")),
+      );
+      return;
+    }
+
     LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
       permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Location permission denied.")),
+        );
+        return;
+      }
     }
 
-    if (permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always) {
-      Position position = await Geolocator.getCurrentPosition();
-      setState(() {
-        _currentPosition = position;
-        _address = "${position.latitude}, ${position.longitude}";
-      });
-    }
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    setState(() {
+      _position = position;
+    });
   }
 
-  void _pickImage() async {
-    final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: ImageSource.camera);
-    if (pickedImage != null) {
+  Future<void> _pickImage() async {
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 75,
+    );
+    if (pickedFile != null) {
       setState(() {
-        _image = File(pickedImage.path);
+        _image = File(pickedFile.path);
       });
     }
   }
 
   void _submitCheckout() async {
-    if (_image == null || _currentPosition == null) {
+    if (_image == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please take a photo and wait for GPS")),
+        const SnackBar(content: Text("Please take a photo before checkout")),
       );
       return;
     }
 
-    var request = http.MultipartRequest(
-      "POST",
-      Uri.parse("${MyConfig.server}/os_application/php/checkout_user.php"),
-    );
-    request.fields['userid'] = widget.user.userId ?? '';
-    request.fields['name'] = widget.user.userName ?? '';
-    request.fields['date'] = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    request.fields['time'] = DateFormat('HH:mm:ss').format(DateTime.now());
-    request.fields['location'] = _address;
+    if (_position == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Waiting for GPS location...")),
+      );
+      return;
+    }
 
+    final checkoutDate = DateTime.now().toLocal().toString().split(' ')[0];
+    final now = TimeOfDay.now();
+    final checkoutTime =
+        "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+
+    final request = http.MultipartRequest(
+      "POST",
+      Uri.parse("${MyConfig.server}/checkout_worker.php"),
+    );
+    request.fields['worker_id'] = widget.worker.workerId ?? '';
+    request.fields['worker_name'] = widget.worker.workerName ?? '';
+    request.fields['checkout_date'] = checkoutDate;
+    request.fields['checkout_time'] = checkoutTime;
+    request.fields['latitude'] = _position!.latitude.toString();
+    request.fields['longitude'] = _position!.longitude.toString();
     request.files.add(await http.MultipartFile.fromPath('image', _image!.path));
 
-    var response = await request.send();
+    final response = await request.send();
+    final result = await http.Response.fromStream(response);
 
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Checkout successful")));
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+    if (response.statusCode == 200 &&
+        jsonDecode(result.body)['status'] == 'success') {
+      _showSuccessDialog(checkoutDate, checkoutTime);
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Checkout failed")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Checkout failed. Please try again."),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  }
+
+  void _showSuccessDialog(String date, String time) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Check Out Successful"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Worker ID: ${widget.worker.workerId}"),
+                Text("Worker Name: ${widget.worker.workerName}"),
+                Text("Checkout Date: $date"),
+                Text("Checkout Time: $time"),
+                if (_position != null)
+                  Text(
+                    "Location: ${_position!.latitude.toStringAsFixed(6)}, ${_position!.longitude.toStringAsFixed(6)}",
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MainScreen(worker: widget.worker),
+                    ),
+                  );
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentDate = DateTime.now().toLocal().toString().split(' ')[0];
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Checkout")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text("User ID: ${widget.user.userId}"),
-            Text("Name: ${widget.user.userName}"),
-            Text("Location: $_address"),
-            const SizedBox(height: 20),
-            _image == null
-                ? const Text("No image taken")
-                : Image.file(_image!, height: 150),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: const Text("Take Photo"),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submitCheckout,
-              child: const Text("Submit Checkout"),
-            ),
-          ],
+      appBar: AppBar(
+        backgroundColor: Colors.greenAccent,
+        title: const Text("Check Out Screen"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MainScreen(worker: widget.worker),
+              ),
+            );
+          },
         ),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Text(
+                          "Worker ID: ${widget.worker.workerId}",
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Worker Name: ${widget.worker.workerName}",
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Date: $currentDate",
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _position == null
+                              ? "Location: Waiting for location..."
+                              : "Location: ${_position!.latitude.toStringAsFixed(6)}, ${_position!.longitude.toStringAsFixed(6)}",
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(height: 20),
+                        _image == null
+                            ? const Text(
+                              "No image taken",
+                              style: TextStyle(fontSize: 18),
+                            )
+                            : Image.file(_image!, height: 220),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: _pickImage,
+                          icon: const Icon(Icons.camera_alt),
+                          label: const Text(
+                            "Take Photo",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40,
+                              vertical: 16,
+                            ),
+                            backgroundColor: Colors.greenAccent,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: _submitCheckout,
+                          label: const Text(
+                            "Check Out",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40,
+                              vertical: 16,
+                            ),
+                            backgroundColor: Colors.greenAccent,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
