@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool isChecked = false;
+  String username = "User";
 
   @override
   void initState() {
@@ -29,8 +30,96 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login Screen"),
+        title: const Text("Login"),
         backgroundColor: const Color.fromARGB(255, 160, 236, 255),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 160, 236, 255),
+              ),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 40,
+                    child: Icon(Icons.person, size: 40, color: Colors.black),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "User",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Not yet logged in",
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.app_registration),
+              title: const Text("Register Account"),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text("Login"),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.assignment),
+              title: const Text("Task List"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please login first to view tasks."),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text("Submission History"),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      "Please login first to view submission history.",
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            const ListTile(leading: Icon(Icons.info), title: Text("More Info")),
+            const ListTile(
+              leading: Icon(Icons.contact_mail),
+              title: Text("Contact Us"),
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -50,6 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: const InputDecoration(labelText: "Email"),
                         keyboardType: TextInputType.emailAddress,
                       ),
+                      const SizedBox(height: 10),
                       TextField(
                         controller: passwordController,
                         decoration: const InputDecoration(
@@ -57,6 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         obscureText: true,
                       ),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           const Text("Remember Me"),
@@ -68,24 +159,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               });
                               String email = emailController.text;
                               String password = passwordController.text;
-                              if (isChecked) {
-                                if (email.isEmpty || password.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Please fill in all the fields",
-                                      ),
-                                      backgroundColor: Color.fromARGB(
-                                        255,
-                                        151,
-                                        151,
-                                        151,
-                                      ),
+                              if (isChecked &&
+                                  (email.isEmpty || password.isEmpty)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Please fill in all the fields",
                                     ),
-                                  );
-                                  isChecked = false;
-                                  return;
-                                }
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                isChecked = false;
+                                return;
                               }
                               storeCredentials(email, password, isChecked);
                             },
@@ -93,31 +178,43 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                       ElevatedButton(
-                        onPressed: () {
-                          loginWorker();
-                        },
+                        onPressed: loginWorker,
                         child: const Text("Login"),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const RegisterScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text("Register a new account?"),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // implement forgot password logic if available
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Forgot password feature not implemented.",
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text("Forgot Password?"),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RegisterScreen(),
-                  ),
-                );
-              },
-              child: const Text("Register a new account?"),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {},
-              child: const Text("Forgot Password?"),
             ),
           ],
         ),
@@ -133,7 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Please fill in all the fields"),
-          backgroundColor: Color.fromARGB(255, 151, 151, 151),
+          backgroundColor: Colors.red,
         ),
       );
       return;
@@ -153,10 +250,13 @@ class _LoginScreenState extends State<LoginScreen> {
           var workerdata = jsondata["data"];
           Worker worker = Worker.fromJson(workerdata[0]);
 
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString("name", worker.workerName ?? "User");
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Welcome ${worker.workerName}"),
-              backgroundColor: const Color.fromARGB(255, 151, 151, 151),
+              backgroundColor: Colors.green,
             ),
           );
 
@@ -170,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Login failed. Check your credentials."),
-              backgroundColor: Color.fromARGB(255, 151, 151, 151),
+              backgroundColor: Colors.red,
             ),
           );
         }
@@ -178,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Server error: ${response.statusCode}"),
-            backgroundColor: const Color.fromARGB(255, 151, 151, 151),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -186,10 +286,9 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Network error: $e"),
-          backgroundColor: const Color.fromARGB(255, 151, 151, 151),
+          backgroundColor: Colors.red,
         ),
       );
-      print("Exception during login: $e");
     }
   }
 
@@ -206,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Pref Stored Success!"),
-          backgroundColor: Color.fromARGB(255, 151, 151, 151),
+          backgroundColor: Colors.green,
         ),
       );
     } else {
@@ -219,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Pref Removed!"),
-          backgroundColor: Color.fromARGB(255, 151, 151, 151),
+          backgroundColor: Colors.red,
         ),
       );
     }
@@ -227,20 +326,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> loadCredentials() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? email = prefs.getString('email');
-    String? password = prefs.getString('pass');
-    bool? isChecked = prefs.getBool('remember');
-    if (email != null && password != null && isChecked != null) {
-      emailController.text = email;
-      passwordController.text = password;
-      setState(() {
-        this.isChecked = isChecked ?? false;
-      });
-    } else {
-      emailController.clear();
-      passwordController.clear();
-      isChecked = false;
-      setState(() {});
-    }
+    emailController.text = prefs.getString('email') ?? "";
+    passwordController.text = prefs.getString('pass') ?? "";
+    username = prefs.getString("name") ?? "User";
+    setState(() {
+      isChecked = prefs.getBool('remember') ?? false;
+    });
   }
 }

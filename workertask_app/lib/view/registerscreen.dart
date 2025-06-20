@@ -23,8 +23,68 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Register Screen"),
+        title: const Text("Register Account"),
         backgroundColor: const Color.fromARGB(255, 160, 236, 255),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 160, 236, 255),
+              ),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    backgroundColor: Colors.white,
+                    radius: 40,
+                    child: Icon(Icons.person, size: 40, color: Colors.black),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "User",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Not yet logged in",
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.app_registration),
+              title: const Text("Register Account"),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.login),
+              title: const Text("Login"),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              },
+            ),
+            const Divider(),
+            const ListTile(leading: Icon(Icons.info), title: Text("More Info")),
+            const ListTile(
+              leading: Icon(Icons.contact_mail),
+              title: Text("Contact Us"),
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -38,7 +98,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextField(
                       controller: nameController,
                       decoration: const InputDecoration(labelText: "Full Name"),
-                      keyboardType: TextInputType.text,
                     ),
                     TextField(
                       controller: emailController,
@@ -65,12 +124,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextField(
                       controller: addressController,
                       decoration: const InputDecoration(labelText: "Address"),
-                      keyboardType: TextInputType.text,
-                      maxLines: 5,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 4,
                     ),
                     const SizedBox(height: 20),
                     SizedBox(
-                      width: 400,
+                      width: double.infinity,
                       child: ElevatedButton(
                         onPressed: registerWorkerDialog,
                         child: const Text("Register"),
@@ -100,30 +159,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         confirmPassword.isEmpty ||
         phone.isEmpty ||
         address.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all the fields")),
-      );
+      showSnackBar("Please fill in all the fields");
       return;
     }
 
     if (!email.contains('@') || !email.contains('.')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a valid email")),
-      );
+      showSnackBar("Please enter a valid email");
       return;
     }
 
     if (password.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Password must be at least 6 characters")),
-      );
+      showSnackBar("Password must be at least 6 characters");
       return;
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
+      showSnackBar("Passwords do not match");
       return;
     }
 
@@ -136,9 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           actions: [
             TextButton(
               child: const Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
               child: const Text("Ok"),
@@ -172,24 +221,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
           },
         )
         .then((response) {
-      print(response.body);
-      if (response.statusCode == 200) {
-        var jsondata = json.decode(response.body);
-        if (jsondata['status'] == 'success') {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text("Success!")));
-          Navigator.of(context).pop();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to register")),
-          );
-        }
-      }
-    });
+          if (response.statusCode == 200) {
+            var jsondata = json.decode(response.body);
+            if (jsondata['status'] == 'success') {
+              showSnackBar("Registration successful!", isError: false);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+            } else {
+              showSnackBar("Failed to register");
+            }
+          } else {
+            showSnackBar("Server error: ${response.statusCode}");
+          }
+        })
+        .catchError((error) {
+          showSnackBar("Network error: $error");
+        });
+  }
+
+  void showSnackBar(String message, {bool isError = true}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
   }
 }

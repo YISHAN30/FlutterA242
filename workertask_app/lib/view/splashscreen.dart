@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workertask_app/model/worker.dart';
 import 'package:workertask_app/myconfig.dart';
-import 'package:workertask_app/view/profilescreen.dart';
 import 'package:workertask_app/view/loginscreen.dart';
+import 'package:workertask_app/view/profilescreen.dart';
 import 'package:http/http.dart' as http;
 
 class SplashScreen extends StatefulWidget {
@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: const Text(
-                  "Welcome to Worker Task Completion System",
+                  "Welcome to Worker Task Management System",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 29, 2025 at 10:41 AM
+-- Generation Time: Jun 19, 2025 at 12:38 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -35,16 +35,6 @@ CREATE TABLE `tbl_submissions` (
   `submitted_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `tbl_submissions`
---
-
-INSERT INTO `tbl_submissions` (`id`, `work_id`, `worker_id`, `submission_text`, `submitted_at`) VALUES
-(1, 1, 1, 'I have prepare 10 sets of material A.', '2025-05-28 19:52:40'),
-(2, 6, 1, 'All paint is ready\n', '2025-05-28 21:12:56'),
-(3, 2, 2, 'Machine X is functioning well, and I have clean it', '2025-05-29 10:12:37'),
-(4, 4, 4, 'I have test all the unit test for circuit batch 4 and all are functioning well.', '2025-05-29 10:35:14');
-
 -- --------------------------------------------------------
 
 --
@@ -59,15 +49,6 @@ CREATE TABLE `tbl_workers` (
   `worker_phone` varchar(20) NOT NULL,
   `worker_address` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `tbl_workers`
---
-
-INSERT INTO `tbl_workers` (`worker_id`, `worker_name`, `worker_email`, `worker_password`, `worker_phone`, `worker_address`) VALUES
-(1, 'Angel', 'angel123@gmail.com', 'edf360b3f9f25e1b43f3777db55c002035dcfe5c', '01123456789', '123, Jalan Angel, Angel Park, 12345 London'),
-(2, 'Ali', 'ali123@gmail.com', 'e697ef18d3fa82e0fcd427a989a86c694b547c64', '01123456789', 'Sintok, Kedah'),
-(4, 'Lee Yi Shan', 'leeyishan30@gmail.com', '1bb843356107dffa799936b6e2f3682f6deda3da', '0165088987', 'Georgetown, Penang');
 
 -- --------------------------------------------------------
 
@@ -90,12 +71,12 @@ CREATE TABLE `tbl_works` (
 --
 
 INSERT INTO `tbl_works` (`id`, `title`, `description`, `assigned_to`, `date_assigned`, `due_date`, `status`) VALUES
-(1, 'Prepare Material A', 'Prepare raw material A for assembly.', 1, '2025-05-25', '2025-05-28', 'complete'),
-(2, 'Inspect Machine X', 'Conduct inspection for machine X.', 2, '2025-05-25', '2025-05-29', 'complete'),
+(1, 'Prepare Material A', 'Prepare raw material A for assembly.', 1, '2025-05-25', '2025-05-28', 'pending'),
+(2, 'Inspect Machine X', 'Conduct inspection for machine X.', 2, '2025-05-25', '2025-05-29', 'pending'),
 (3, 'Clean Area B', 'Deep clean work area B before audit.', 3, '2025-05-25', '2025-05-30', 'pending'),
-(4, 'Test Circuit Board', 'Perform unit test for circuit batch 4.', 4, '2025-05-25', '2025-05-28', 'complete'),
+(4, 'Test Circuit Board', 'Perform unit test for circuit batch 4.', 4, '2025-05-25', '2025-05-28', 'pending'),
 (5, 'Document Process', 'Write SOP for packaging unit.', 5, '2025-05-25', '2025-05-29', 'pending'),
-(6, 'Paint Booth Check', 'Routine check on painting booth.', 1, '2025-05-25', '2025-05-30', 'complete'),
+(6, 'Paint Booth Check', 'Routine check on painting booth.', 1, '2025-05-25', '2025-05-30', 'pending'),
 (7, 'Label Inventory', 'Label all boxes in section C.', 2, '2025-05-25', '2025-05-28', 'pending'),
 (8, 'Update Database', 'Update inventory in MySQL system.', 3, '2025-05-25', '2025-05-29', 'pending'),
 (9, 'Maintain Equipment', 'Oil and tune cutting machine.', 4, '2025-05-25', '2025-05-30', 'pending'),
